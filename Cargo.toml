@@ -1,0 +1,23 @@
+[package]
+name = "langchain_simsearch_api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-multipart = "0.7.2"
+actix-web = "4.8.0"
+anyhow = "1.0.86"
+deadpool-postgres = { version = "0.14.0", features = ["serde"] }
+dotenvy = "0.15.7"
+env_logger = "0.11.4"
+pgvector = { version = "0.4.0", features = ["postgres"] }
+postgres = { version = "0.19.8", features = ["with-uuid-1"] }
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.120"
+uuid = { version = "1.11.0", features = ["v4", "serde"] }
+
+
+[profile.release]
+opt-level = "z"
+strip = true  # WE STRIPPING THE SYMBOLS WITH THIS ONE  🗣️🗣️🔥🔥🔥
+lto = true

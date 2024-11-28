@@ -1,0 +1,30 @@
+version: "3.9"
+
+x-default-opts: &default-opts
+  logging:
+    options:
+      max-size: "100m"
+
+services:
+  purplerag_db:
+    image: pgvector/pgvector:pg16
+    env_file: .env
+    volumes:
+      - ./pgvec_data/:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=langchain
+      - POSTGRES_USER=langchain
+      - POSTGRES_PASSWORD=langchain
+    networks:
+      - share-network
+  purplerag_db_api:
+    image: localhost:5000/purplerag_db_api:latest
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    networks:
+      - share-network
+networks:
+  share-network:
+    external: true
