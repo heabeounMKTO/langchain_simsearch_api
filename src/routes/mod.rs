@@ -70,7 +70,7 @@ pub async fn get_similar_strings(
     let _string_embedding = pgvector::Vector::from(form.string_embedding.to_owned());
     let rows = match _search_type {
         SimilaritySearchType::MmrSimilarity(_mmr) => {
-            let _diversity: i32 = _mmr.diversity.to_owned() as i32;
+            let _diversity: i32 = _mmr.diversity as i32;
             let _query = generate_similarity_search_query(&_search_type).unwrap();
             client
                 .query(
@@ -106,7 +106,7 @@ pub async fn get_similar_strings(
             client
                 .query(
                     _query,
-                    &[&_string_embedding, &placeholder_collection_name, &_k],
+                    &[&_string_embedding, &placeholder_collection_name, &_k, &_threshold],
                 )
                 .await
                 .unwrap()
