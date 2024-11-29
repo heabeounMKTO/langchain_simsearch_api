@@ -16,7 +16,7 @@ pub enum SimilaritySearchType {
 pub struct SimilarityThreshold {
     pub similarity: f64,
 }
-
+/// TODO: just make it `SimilarityThreshold` holy shit
 #[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 pub struct MmrSimilarityThreshold {
     pub similarity: f64,
@@ -57,7 +57,7 @@ impl Interval for MmrSimilarityThreshold {
 ///       $3 is the limit to search
 ///       $4 (optional) is the diversity for MMR similarity
 pub fn generate_similarity_search_query(
-    search_type: SimilaritySearchType,
+    search_type: &SimilaritySearchType,
 ) -> Result<&'static str, Error> {
     let search_string: Result<&str, Error> = match search_type {
         SimilaritySearchType::CosineSimilarity(_) => Ok(
@@ -65,6 +65,7 @@ pub fn generate_similarity_search_query(
                                                     AS similarity
                                                     FROM langchain_pg_embedding 
                                                     WHERE collection_id=$2 
+                                                        AND (1 - (embedding <=> $1)) >= $4
                                                     ORDER BY similarity DESC LIMIT $3",
         ),
         SimilaritySearchType::L1Similarity(_) => {
@@ -72,6 +73,7 @@ pub fn generate_similarity_search_query(
                                                     AS similarity
                                                     FROM langchain_pg_embedding 
                                                     WHERE collection_id=$2 
+                                                        AND (1 - (embedding <=> $1)) >= $4
                                                     ORDER BY similarity DESC LIMIT $3")
         }
         SimilaritySearchType::L2Similarity(_) => {
@@ -79,6 +81,7 @@ pub fn generate_similarity_search_query(
                                                     AS similarity
                                                     FROM langchain_pg_embedding 
                                                     WHERE collection_id=$2 
+                                                        AND (1 - (embedding <=> $1)) >= $4
                                                     ORDER BY similarity DESC LIMIT $3")
         }
         SimilaritySearchType::MmrSimilarity(_) => Ok("
@@ -90,6 +93,7 @@ pub fn generate_similarity_search_query(
                         1 - (embedding <=> $1) AS similarity
                     FROM langchain_pg_embedding 
                     WHERE collection_id = $2 
+                        AND (1 - (embedding <=> $1)) >= $5
                     ORDER BY similarity DESC
                     LIMIT $3 * 2
                 ),

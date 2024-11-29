@@ -49,6 +49,7 @@ pub async fn get_similar_strings(
     form: web::Json<SimilarStringRequest>,
     _: HttpRequest,
 ) -> HttpResponse {
+
     // parse da json optiionZ
     let _k: i64 = match form.k {
         Some(k_val) => k_val as i64,
@@ -65,13 +66,12 @@ pub async fn get_similar_strings(
         Some(ref _a) => _a.clone(),
         None => SimilaritySearchType::CosineSimilarity(SimilarityThreshold { similarity: 0.8 }),
     };
-    let _s_t = _search_type.clone();
     let client = pool.get().await.unwrap();
     let _string_embedding = pgvector::Vector::from(form.string_embedding.to_owned());
     let rows = match _search_type {
         SimilaritySearchType::MmrSimilarity(_mmr) => {
             let _diversity: i32 = _mmr.diversity.to_owned() as i32;
-            let _query = generate_similarity_search_query(_search_type.to_owned()).unwrap();
+            let _query = generate_similarity_search_query(&_search_type).unwrap();
             client
                 .query(
                     _query,
@@ -80,13 +80,29 @@ pub async fn get_similar_strings(
                         &placeholder_collection_name,
                         &(_k as i32),
                         &_diversity,
+                        &_mmr.similarity
                     ],
                 )
                 .await
                 .unwrap()
         }
         _ => {
-            let _query = generate_similarity_search_query(_search_type).unwrap();
+            let _threshold = match &_search_type {
+                SimilaritySearchType::CosineSimilarity(_a) => {
+                    _a.similarity
+                }, 
+                SimilaritySearchType::L1Similarity(_a) => {
+                    _a.similarity
+                },
+                SimilaritySearchType::L2Similarity(_a) => {
+                    _a.similarity
+                },
+                _ => {
+                    0.5
+                }
+                
+            };
+            let _query = generate_similarity_search_query(&_search_type).unwrap();
             client
                 .query(
                     _query,
@@ -125,7 +141,7 @@ pub async fn get_similar_strings(
 
     HttpResponse::Ok().json(SimilarStringResponse {
         message: String::from("success"),
-        search_type: _s_t,
+        search_type: _search_type,
         status: 200,
         similar_strings: similar_str,
     })
