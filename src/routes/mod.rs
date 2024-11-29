@@ -49,7 +49,6 @@ pub async fn get_similar_strings(
     form: web::Json<SimilarStringRequest>,
     _: HttpRequest,
 ) -> HttpResponse {
-
     // parse da json optiionZ
     let _k: i64 = match form.k {
         Some(k_val) => k_val as i64,
@@ -80,7 +79,7 @@ pub async fn get_similar_strings(
                         &placeholder_collection_name,
                         &(_k as i32),
                         &_diversity,
-                        &_mmr.similarity
+                        &_mmr.similarity,
                     ],
                 )
                 .await
@@ -88,25 +87,21 @@ pub async fn get_similar_strings(
         }
         _ => {
             let _threshold = match &_search_type {
-                SimilaritySearchType::CosineSimilarity(_a) => {
-                    _a.similarity
-                }, 
-                SimilaritySearchType::L1Similarity(_a) => {
-                    _a.similarity
-                },
-                SimilaritySearchType::L2Similarity(_a) => {
-                    _a.similarity
-                },
-                _ => {
-                    0.5
-                }
-                
+                SimilaritySearchType::CosineSimilarity(_a) => _a.similarity,
+                SimilaritySearchType::L1Similarity(_a) => _a.similarity,
+                SimilaritySearchType::L2Similarity(_a) => _a.similarity,
+                _ => 0.5,
             };
             let _query = generate_similarity_search_query(&_search_type).unwrap();
             client
                 .query(
                     _query,
-                    &[&_string_embedding, &placeholder_collection_name, &_k, &_threshold],
+                    &[
+                        &_string_embedding,
+                        &placeholder_collection_name,
+                        &_k,
+                        &_threshold,
+                    ],
                 )
                 .await
                 .unwrap()

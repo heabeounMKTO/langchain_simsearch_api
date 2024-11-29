@@ -52,10 +52,16 @@ impl Interval for MmrSimilarityThreshold {
 ///
 /// reason we using $ instead of just inserting numbers is for consistency
 /// (copy pasting SQL queries)
-/// note: $1 is meant for the vector you want to query
+///
+/// ```text
+/// note:
+///       $1 is meant for the vector you want to query
 ///       $2 is the collection_id or merchant's index
-///       $3 is the limit to search
-///       $4 (optional) is the diversity for MMR similarity
+///       $3 is the total count to search
+///       $4 is the similiarity threshold
+///       $5 (optional) is the diversity for MMR similarity (less diverse) 0.0 <=> 1.0 (more
+///       diverse)
+/// ```
 pub fn generate_similarity_search_query(
     search_type: &SimilaritySearchType,
 ) -> Result<&'static str, Error> {
